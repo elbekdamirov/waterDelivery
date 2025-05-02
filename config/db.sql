@@ -68,5 +68,5 @@ SELECT o.*
 FROM `orders` o
 JOIN `User` u ON o.user_id = u.id
 WHERE u.first_name = 'Elbek'
-AND o.date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH);
-
+AND TIMESTAMPDIFF(MONTH, o.date, CURDATE()) <= 6
+;

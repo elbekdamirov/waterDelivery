@@ -112,7 +112,7 @@ const getLastOrders = (req, res) => {
     FROM orders o
     JOIN User u ON o.user_id = u.id
     WHERE u.first_name = '${name}'
-    AND o.date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH);`,
+    AND TIMESTAMPDIFF(MONTH, o.date, CURDATE()) <= 6`,
     (error, result) => {
       if (error) {
         console.log(`Error get orders`, error);
