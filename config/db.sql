@@ -26,7 +26,8 @@ CREATE TABLE `phone`(
     `number` BIGINT NOT NULL,
     `owner_name` VARCHAR(255) NOT NULL
 );
-CREATE TABLE `order`(
+
+CREATE TABLE `orders`(
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `user_id` BIGINT NOT NULL,
     `deliver_id` BIGINT NOT NULL,
@@ -55,4 +56,17 @@ CREATE TABLE `payment`(
     `type` ENUM('cash', 'card') NOT NULL,
     `status` ENUM('pending', 'completed', 'failed') NOT NULL
 );
+
+
+
+SELECT DISTINCT u.id, u.first_name, u.last_name, u.phone_number, u.email
+FROM `orders` o
+JOIN `User` u ON o.user_id = u.id
+WHERE o.date BETWEEN '2024-11-01' AND '2025-04-30';
+
+SELECT o.*
+FROM `orders` o
+JOIN `User` u ON o.user_id = u.id
+WHERE u.first_name = 'Elbek'
+AND o.date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH);
 

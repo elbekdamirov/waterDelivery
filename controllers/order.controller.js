@@ -8,7 +8,7 @@ const findAll = (req, res) => {
   offset = offset ? offset : 1;
 
   db.query(
-    `select * from order limit ${limit} offset ${(offset - 1) * limit}`,
+    `select * from orders limit ${limit} offset ${(offset - 1) * limit}`,
     (err, result) => {
       if (err) {
         return res.status(500).send({ message: err.message });
@@ -20,7 +20,7 @@ const findAll = (req, res) => {
 
 const findOne = (req, res) => {
   let { id } = req.params;
-  db.query(`select * from order where id=?`, [id], (err, result) => {
+  db.query(`select * from orders where id=?`, [id], (err, result) => {
     if (err) {
       return res.status(500).send({ message: err.message });
     }
@@ -39,7 +39,7 @@ const create = (req, res) => {
     status,
   } = req.body;
   db.query(
-    `insert into order ( user_id, deliver_id, water_count, total_price, date, promised_time, status) values (?, ?, ?, ?, ?, ?, ?)`,
+    `insert into orders ( user_id, deliver_id, water_count, total_price, date, promised_time, status) values (?, ?, ?, ?, ?, ?, ?)`,
     [
       user_id,
       deliver_id,
@@ -64,7 +64,7 @@ const update = (req, res) => {
   let values = Object.values(data);
 
   db.query(
-    `update order set ${queryGenerate(Object.keys(data))} where id =?`,
+    `update orders set ${queryGenerate(Object.keys(data))} where id =?`,
     [...values, id],
     (err, result) => {
       if (err) {
@@ -78,12 +78,49 @@ const update = (req, res) => {
 const remove = (req, res) => {
   let { id } = req.params;
 
-  db.query(`delete from order where id=?`, [id], (err, result) => {
+  db.query(`delete from orders where id=?`, [id], (err, result) => {
     if (err) {
       return res.status(500).send({ message: err.message });
     }
     res.status(200).send({ data: result });
   });
+};
+
+const getOrderByDate = (req, res) => {
+  let { start_date, end_date } = req.body;
+
+  db.query(
+    `SELECT DISTINCT u.id, u.first_name, u.last_name, u.phone_number, u.email
+    FROM orders o
+    JOIN User u ON o.user_id = u.id
+    WHERE o.date BETWEEN '${start_date}' AND '${end_date}'`,
+    (error, result) => {
+      if (error) {
+        console.log(`Error get orders`, error);
+        return res.status(500).send({ message: "Serverda xatolik" });
+      }
+      res.send(result);
+    }
+  );
+};
+
+const getLastOrders = (req, res) => {
+  let { name } = req.body;
+
+  db.query(
+    `SELECT o.*
+    FROM orders o
+    JOIN User u ON o.user_id = u.id
+    WHERE u.first_name = '${name}'
+    AND o.date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH);`,
+    (error, result) => {
+      if (error) {
+        console.log(`Error get orders`, error);
+        return res.status(500).send({ message: "Serverda xatolik" });
+      }
+      res.send(result);
+    }
+  );
 };
 
 module.exports = {
@@ -92,4 +129,6 @@ module.exports = {
   create,
   update,
   remove,
+  getOrderByDate,
+  getLastOrders,
 };
